@@ -39,11 +39,7 @@ contract UniswapV2Router01 is IUniswapV2Router01 {
         if (IUniswapV2Factory(factory).getPair(tokenA, tokenB) == address(0)) {
             IUniswapV2Factory(factory).createPair(tokenA, tokenB);
         }
-        (uint256 reserveA, uint256 reserveB) = UniswapV2Library.getReserves(
-            factory,
-            tokenA,
-            tokenB
-        );
+        (uint256 reserveA, uint256 reserveB) = UniswapV2Library.getReserves(factory, tokenA, tokenB);
         if (reserveA == 0 && reserveB == 0) {
             (amountA, amountB) = (amountADesired, amountBDesired);
         } else {
@@ -79,14 +75,7 @@ contract UniswapV2Router01 is IUniswapV2Router01 {
             uint256 liquidity
         )
     {
-        (amountA, amountB) = _addLiquidity(
-            tokenA,
-            tokenB,
-            amountADesired,
-            amountBDesired,
-            amountAMin,
-            amountBMin
-        );
+        (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
         address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
         TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
         TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
@@ -124,8 +113,7 @@ contract UniswapV2Router01 is IUniswapV2Router01 {
         IWETH(WETH).deposit{ value: amountETH }();
         assert(IWETH(WETH).transfer(pair, amountETH));
         liquidity = IUniswapV2Pair(pair).mint(to);
-        if (msg.value > amountETH)
-            TransferHelper.safeTransferETH(msg.sender, msg.value - amountETH); // refund dust eth, if any
+        if (msg.value > amountETH) TransferHelper.safeTransferETH(msg.sender, msg.value - amountETH); // refund dust eth, if any
     }
 
     // **** REMOVE LIQUIDITY ****
@@ -185,15 +173,7 @@ contract UniswapV2Router01 is IUniswapV2Router01 {
         address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
         uint256 value = approveMax ? uint256(-1) : liquidity;
         IUniswapV2Pair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
-        (amountA, amountB) = removeLiquidity(
-            tokenA,
-            tokenB,
-            liquidity,
-            amountAMin,
-            amountBMin,
-            to,
-            deadline
-        );
+        (amountA, amountB) = removeLiquidity(tokenA, tokenB, liquidity, amountAMin, amountBMin, to, deadline);
     }
 
     function removeLiquidityETHWithPermit(
@@ -211,14 +191,7 @@ contract UniswapV2Router01 is IUniswapV2Router01 {
         address pair = UniswapV2Library.pairFor(factory, token, WETH);
         uint256 value = approveMax ? uint256(-1) : liquidity;
         IUniswapV2Pair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
-        (amountToken, amountETH) = removeLiquidityETH(
-            token,
-            liquidity,
-            amountTokenMin,
-            amountETHMin,
-            to,
-            deadline
-        );
+        (amountToken, amountETH) = removeLiquidityETH(token, liquidity, amountTokenMin, amountETHMin, to, deadline);
     }
 
     // **** SWAP ****
@@ -235,9 +208,7 @@ contract UniswapV2Router01 is IUniswapV2Router01 {
             (uint256 amount0Out, uint256 amount1Out) = input == token0
                 ? (uint256(0), amountOut)
                 : (amountOut, uint256(0));
-            address to = i < path.length - 2
-                ? UniswapV2Library.pairFor(factory, output, path[i + 2])
-                : _to;
+            address to = i < path.length - 2 ? UniswapV2Library.pairFor(factory, output, path[i + 2]) : _to;
             IUniswapV2Pair(UniswapV2Library.pairFor(factory, input, output)).swap(
                 amount0Out,
                 amount1Out,
@@ -255,10 +226,7 @@ contract UniswapV2Router01 is IUniswapV2Router01 {
         uint256 deadline
     ) external override ensure(deadline) returns (uint256[] memory amounts) {
         amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
-        require(
-            amounts[amounts.length - 1] >= amountOutMin,
-            "UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT"
-        );
+        require(amounts[amounts.length - 1] >= amountOutMin, "UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT");
         TransferHelper.safeTransferFrom(
             path[0],
             msg.sender,
@@ -294,14 +262,9 @@ contract UniswapV2Router01 is IUniswapV2Router01 {
     ) external payable override ensure(deadline) returns (uint256[] memory amounts) {
         require(path[0] == WETH, "UniswapV2Router: INVALID_PATH");
         amounts = UniswapV2Library.getAmountsOut(factory, msg.value, path);
-        require(
-            amounts[amounts.length - 1] >= amountOutMin,
-            "UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT"
-        );
+        require(amounts[amounts.length - 1] >= amountOutMin, "UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT");
         IWETH(WETH).deposit{ value: amounts[0] }();
-        assert(
-            IWETH(WETH).transfer(UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0])
-        );
+        assert(IWETH(WETH).transfer(UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]));
         _swap(amounts, path, to);
     }
 
@@ -335,10 +298,7 @@ contract UniswapV2Router01 is IUniswapV2Router01 {
     ) external override ensure(deadline) returns (uint256[] memory amounts) {
         require(path[path.length - 1] == WETH, "UniswapV2Router: INVALID_PATH");
         amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
-        require(
-            amounts[amounts.length - 1] >= amountOutMin,
-            "UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT"
-        );
+        require(amounts[amounts.length - 1] >= amountOutMin, "UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT");
         TransferHelper.safeTransferFrom(
             path[0],
             msg.sender,
@@ -360,12 +320,9 @@ contract UniswapV2Router01 is IUniswapV2Router01 {
         amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
         require(amounts[0] <= msg.value, "UniswapV2Router: EXCESSIVE_INPUT_AMOUNT");
         IWETH(WETH).deposit{ value: amounts[0] }();
-        assert(
-            IWETH(WETH).transfer(UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0])
-        );
+        assert(IWETH(WETH).transfer(UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]));
         _swap(amounts, path, to);
-        if (msg.value > amounts[0])
-            TransferHelper.safeTransferETH(msg.sender, msg.value - amounts[0]); // refund dust eth, if any
+        if (msg.value > amounts[0]) TransferHelper.safeTransferETH(msg.sender, msg.value - amounts[0]); // refund dust eth, if any
     }
 
     function quote(

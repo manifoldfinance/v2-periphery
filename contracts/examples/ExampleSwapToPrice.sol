@@ -62,17 +62,8 @@ contract ExampleSwapToPrice {
         bool aToB;
         uint256 amountIn;
         {
-            (uint256 reserveA, uint256 reserveB) = UniswapV2Library.getReserves(
-                factory,
-                tokenA,
-                tokenB
-            );
-            (aToB, amountIn) = computeProfitMaximizingTrade(
-                truePriceTokenA,
-                truePriceTokenB,
-                reserveA,
-                reserveB
-            );
+            (uint256 reserveA, uint256 reserveB) = UniswapV2Library.getReserves(factory, tokenA, tokenB);
+            (aToB, amountIn) = computeProfitMaximizingTrade(truePriceTokenA, truePriceTokenB, reserveA, reserveB);
         }
 
         // spend up to the allowance of the token in
