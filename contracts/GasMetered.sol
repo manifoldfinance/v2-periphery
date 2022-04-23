@@ -1,9 +1,9 @@
 pragma solidity =0.6.6;
 pragma experimental ABIEncoderV2;
 
-import '@uniswap/lib/contracts/libraries/TransferHelper.sol';
-import '@openzeppelin/contracts/cryptography/ECDSA.sol';
-import './libraries/SafeMath.sol';
+import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
+import "@openzeppelin/contracts/cryptography/ECDSA.sol";
+import "./libraries/SafeMath.sol";
 
 abstract contract GasMetered {
     using SafeMath for uint256;
@@ -20,13 +20,16 @@ abstract contract GasMetered {
         bytes signature;
     }
 
-    function getEthExchangeRate(address token) internal virtual returns (uint256 reserveInput, uint256 reserveOutput);
+    function getEthExchangeRate(address token)
+        internal
+        virtual
+        returns (uint256 reserveInput, uint256 reserveOutput);
 
     function getAmountOut(
         uint256 amountIn,
         uint256 reserveIn,
         uint256 reserveOut
-    ) public virtual pure returns (uint256 amountOut);
+    ) public pure virtual returns (uint256 amountOut);
 
     function _checkSignatureAndUpdateReplay(
         bytes memory data,
@@ -50,10 +53,10 @@ abstract contract GasMetered {
                 address(this)
             )
         );
-        require(signedHashes[h] == false, 'GasMetered: REPLAY_USED');
+        require(signedHashes[h] == false, "GasMetered: REPLAY_USED");
         address signer = ECDSA.recover(ECDSA.toEthSignedMessageHash(h), replayProtection.signature); // about 3k
 
-        require(signer == replayProtection.signer, 'GasMetered: INVALID_SIGNER');
+        require(signer == replayProtection.signer, "GasMetered: INVALID_SIGNER");
         signedHashes[h] = true;
     }
 
@@ -83,6 +86,11 @@ abstract contract GasMetered {
         uint256 ethUsed = tx.gasprice.mul(gasUsedTracker);
 
         uint256 amountOutput = getAmountOut(ethUsed, reserveInput, reserveOutput);
-        TransferHelper.safeTransferFrom(gasRefund.token, replayProtection.signer, gasRefund.gasPayer, amountOutput);
+        TransferHelper.safeTransferFrom(
+            gasRefund.token,
+            replayProtection.signer,
+            gasRefund.gasPayer,
+            amountOutput
+        );
     }
 }
