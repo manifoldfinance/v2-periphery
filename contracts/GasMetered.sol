@@ -20,10 +20,7 @@ abstract contract GasMetered {
         bytes signature;
     }
 
-    function getEthExchangeRate(address token)
-        internal
-        virtual
-        returns (uint256 reserveInput, uint256 reserveOutput);
+    function getEthExchangeRate(address token) internal virtual returns (uint256 reserveInput, uint256 reserveOutput);
 
     function getAmountOut(
         uint256 amountIn,
@@ -86,11 +83,6 @@ abstract contract GasMetered {
         uint256 ethUsed = tx.gasprice.mul(gasUsedTracker);
 
         uint256 amountOutput = getAmountOut(ethUsed, reserveInput, reserveOutput);
-        TransferHelper.safeTransferFrom(
-            gasRefund.token,
-            replayProtection.signer,
-            gasRefund.gasPayer,
-            amountOutput
-        );
+        TransferHelper.safeTransferFrom(gasRefund.token, replayProtection.signer, gasRefund.gasPayer, amountOutput);
     }
 }

@@ -57,11 +57,7 @@ contract ExampleFlashSwap is IUniswapV2Callee {
         if (amountToken > 0) {
             uint256 minETH = abi.decode(data, (uint256)); // slippage parameter for V1, passed in by caller
             token.approve(address(exchangeV1), amountToken);
-            uint256 amountReceived = exchangeV1.tokenToEthSwapInput(
-                amountToken,
-                minETH,
-                uint256(-1)
-            );
+            uint256 amountReceived = exchangeV1.tokenToEthSwapInput(amountToken, minETH, uint256(-1));
             uint256 amountRequired = UniswapV2Library.getAmountsIn(factory, amountToken, path)[0];
             assert(amountReceived > amountRequired); // fail if we didn't get enough ETH back to repay our flash loan
             WETH.deposit{ value: amountRequired }();
@@ -71,10 +67,7 @@ contract ExampleFlashSwap is IUniswapV2Callee {
         } else {
             uint256 minTokens = abi.decode(data, (uint256)); // slippage parameter for V1, passed in by caller
             WETH.withdraw(amountETH);
-            uint256 amountReceived = exchangeV1.ethToTokenSwapInput{ value: amountETH }(
-                minTokens,
-                uint256(-1)
-            );
+            uint256 amountReceived = exchangeV1.ethToTokenSwapInput{ value: amountETH }(minTokens, uint256(-1));
             uint256 amountRequired = UniswapV2Library.getAmountsIn(factory, amountETH, path)[0];
             assert(amountReceived > amountRequired); // fail if we didn't get enough tokens back to repay our flash loan
             assert(token.transfer(msg.sender, amountRequired)); // return tokens to V2 pair
