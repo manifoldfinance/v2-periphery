@@ -1,0 +1,13 @@
+*.html
+*.min.js
+*.css
+*.scss
+tests/
+!src/*
+test_config/
+tests_config/
+test/
+__snapshots__
+coverage/
+tests/format/**/*.sol
+buildV1/**/*.json
