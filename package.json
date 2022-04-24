@@ -1,19 +1,33 @@
 {
   "name": "@uniswap/v2-periphery",
   "version": "1.1.0-beta.0",
-  "description": "🎚 Peripheral smart contracts for interacting with Uniswap V2",
-  "engines": {
-    "node": ">=10"
-  },
-  "homepage": "https://uniswap.org",
+  "description": "Peripheral smart contracts for interacting with Uniswap V2",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Uniswap/uniswap-v2-periphery"
+    "url": "https://github.com/manifoldfinance/uniswap-v2-periphery"
   },
   "files": [
-    "build",
-    "contracts"
+    "/dist/**/*",
+    "/contracts",
+    "/contracts/base",
+    "/contracts/interfaces",
+    "/contracts/libraries",
+    "/artifacts/contracts/**/*.json",
+    "!artifacts/contracts/**/*.dbg.json",
+    "!artifacts/contracts/test/**/*",
+    "!artifacts/contracts/base/**/*"
   ],
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "typings": "dist/index.d.ts",
   "dependencies": {
     "@openzeppelin/contracts": "3.4.2",
     "@uniswap/lib": "4.0.1-alpha",
