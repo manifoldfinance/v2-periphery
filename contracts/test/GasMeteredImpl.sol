@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import '../GasMetered.sol';
 import '../libraries/SafeMath.sol';
-import '../TestTarget.sol';
+import './TestTarget.sol';
 
 contract GasMeteredImpl is GasMetered, TestTarget {
     uint256 public immutable reserveInput;
