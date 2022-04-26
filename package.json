@@ -1,6 +1,6 @@
 {
-  "name": "sushiswap-v2-periphery",
-  "version": "1.1.0-beta.1",
+  "name": "sushiswap-v1-periphery",
+  "version": "1.2.0-RC.0",
   "description": "Peripheral smart contracts for interacting with Sushiswap V1",
   "repository": {
     "type": "git",
@@ -51,6 +51,7 @@
     "typescript": "4.6.3"
   },
   "scripts": {
+    "build": "npx hardhat compile",
     "lint": "yarn prettier ./test/*.ts --check",
     "lint:fix": "yarn prettier ./test/*.ts --write",
     "clean": "rimraf ./build/",
