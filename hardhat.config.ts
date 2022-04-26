@@ -23,7 +23,7 @@ const config: HardhatUserConfig = {
 *
 */
 solidity: {
-    version: '0.8.10',
+    version: '0.6.6',
     settings: {
       metadata: {
         bytecodeHash: 'none',

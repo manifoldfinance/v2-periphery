@@ -4,6 +4,10 @@
 cache/
 artifacts
 coverage/
+types/
+type-doc/
+type-docs/
+output/
 
 ## General ##
 *~
