@@ -11,18 +11,19 @@ import '@typechain/hardhat';
 import 'dotenv/config';
 import { HardhatUserConfig } from 'hardhat/types';
 
-const test_mnemonic = 'test test test test test test test test test test test junk';
+const test_mnemonic =
+  'test test test test test test test test test test test junk';
 
 /** @type import('hardhat/config').HardhatUserConfig */
 const config: HardhatUserConfig = {
-/**
-* @note
-* Before version 0.8.6 omitting the 'enabled' key was not equivalent to setting
-* it to false and would actually disable all the optimizations.
-* @see: {@link https://docs.soliditylang.org/en/latest/using-the-compiler.html#compiler-input-and-output-json-description}
-*
-*/
-solidity: {
+  /**
+   * @note
+   * Before version 0.8.6 omitting the 'enabled' key was not equivalent to setting
+   * it to false and would actually disable all the optimizations.
+   * @see: {@link https://docs.soliditylang.org/en/latest/using-the-compiler.html#compiler-input-and-output-json-description}
+   *
+   */
+  solidity: {
     version: '0.6.6',
     settings: {
       metadata: {

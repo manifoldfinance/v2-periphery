@@ -1,3 +1,7 @@
+types/
+type-doc*
+artifacts/
+cache/
 *.html
 *.min.js
 *.css
