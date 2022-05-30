@@ -9,7 +9,44 @@ import "./libraries/SafeMath.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/IWETH.sol";
 
-contract UniswapV2Router02 is IUniswapV2Router02 {
+// Adapted from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/GSN/GSNRecipient.sol
+contract SelfMsgSender {
+    /**
+     * @dev Replacement for msg.sender. Returns the actual sender of a transaction: msg.sender for regular transactions,
+     * and the end-user for relayed calls (where msg.sender is actually `this`).
+     */
+    function _msgSender() internal view virtual returns (address payable) {
+        if (msg.sender == address(this)) {
+            return _getRelayedCallSender();
+        } else {
+            return msg.sender;
+        }
+    }
+
+    function _getRelayedCallSender() private pure returns (address payable result) {
+        // We need to read 20 bytes (an address) located at array index msg.data.length - 20. In memory, the array
+        // is prefixed with a 32-byte length value, so we first add 32 to get the memory read index. However, doing
+        // so would leave the address in the upper 20 bytes of the 32-byte word, which is inconvenient and would
+        // require bit shifting. We therefore subtract 12 from the read index so the address lands on the lower 20
+        // bytes. This can always be done due to the 32-byte prefix.
+
+        // The final memory read index is msg.data.length - 20 + 32 - 12 = msg.data.length. Using inline assembly is the
+        // easiest/most-efficient way to perform this operation.
+
+        // These fields are not accessible from assembly
+        bytes memory array = msg.data;
+        uint256 index = msg.data.length;
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            // Load the 32 bytes word from memory with the address on the lower 20 bytes, and mask those.
+            result := and(mload(add(array, index)), 0xffffffffffffffffffffffffffffffffffffffff)
+        }
+        return result;
+    }
+}
+
+contract UniswapV2Router03 is IUniswapV2Router02, SelfMsgSender {
     using SafeMath for uint256;
 
     address public immutable override factory;
@@ -81,8 +118,8 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
     {
         (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
         address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
-        TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
-        TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
+        TransferHelper.safeTransferFrom(tokenA, _msgSender(), pair, amountA);
+        TransferHelper.safeTransferFrom(tokenB, _msgSender(), pair, amountB);
         liquidity = IUniswapV2Pair(pair).mint(to);
     }
 
@@ -114,12 +151,12 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
             amountETHMin
         );
         address pair = UniswapV2Library.pairFor(factory, token, WETH);
-        TransferHelper.safeTransferFrom(token, msg.sender, pair, amountToken);
+        TransferHelper.safeTransferFrom(token, _msgSender(), pair, amountToken);
         IWETH(WETH).deposit{ value: amountETH }();
         assert(IWETH(WETH).transfer(pair, amountETH));
         liquidity = IUniswapV2Pair(pair).mint(to);
         // refund dust eth, if any
-        if (msg.value > amountETH) TransferHelper.safeTransferETH(msg.sender, msg.value - amountETH);
+        if (msg.value > amountETH) TransferHelper.safeTransferETH(_msgSender(), msg.value - amountETH);
     }
 
     // **** REMOVE LIQUIDITY ****
@@ -133,7 +170,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         uint256 deadline
     ) public virtual override ensure(deadline) returns (uint256 amountA, uint256 amountB) {
         address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
-        IUniswapV2Pair(pair).transferFrom(msg.sender, pair, liquidity); // send liquidity to pair
+        IUniswapV2Pair(pair).transferFrom(_msgSender(), pair, liquidity); // send liquidity to pair
         (uint256 amount0, uint256 amount1) = IUniswapV2Pair(pair).burn(to);
         (address token0, ) = UniswapV2Library.sortTokens(tokenA, tokenB);
         (amountA, amountB) = tokenA == token0 ? (amount0, amount1) : (amount1, amount0);
@@ -178,7 +215,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
     ) external virtual override returns (uint256 amountA, uint256 amountB) {
         address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
         uint256 value = approveMax ? uint256(-1) : liquidity;
-        IUniswapV2Pair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
+        IUniswapV2Pair(pair).permit(_msgSender(), address(this), value, deadline, v, r, s);
         (amountA, amountB) = removeLiquidity(tokenA, tokenB, liquidity, amountAMin, amountBMin, to, deadline);
     }
 
@@ -196,7 +233,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
     ) external virtual override returns (uint256 amountToken, uint256 amountETH) {
         address pair = UniswapV2Library.pairFor(factory, token, WETH);
         uint256 value = approveMax ? uint256(-1) : liquidity;
-        IUniswapV2Pair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
+        IUniswapV2Pair(pair).permit(_msgSender(), address(this), value, deadline, v, r, s);
         (amountToken, amountETH) = removeLiquidityETH(token, liquidity, amountTokenMin, amountETHMin, to, deadline);
     }
 
@@ -229,7 +266,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
     ) external virtual override returns (uint256 amountETH) {
         address pair = UniswapV2Library.pairFor(factory, token, WETH);
         uint256 value = approveMax ? uint256(-1) : liquidity;
-        IUniswapV2Pair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
+        IUniswapV2Pair(pair).permit(_msgSender(), address(this), value, deadline, v, r, s);
         amountETH = removeLiquidityETHSupportingFeeOnTransferTokens(
             token,
             liquidity,
@@ -275,7 +312,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         require(amounts[amounts.length - 1] >= amountOutMin, "UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT");
         TransferHelper.safeTransferFrom(
             path[0],
-            msg.sender,
+            _msgSender(),
             UniswapV2Library.pairFor(factory, path[0], path[1]),
             amounts[0]
         );
@@ -293,7 +330,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         require(amounts[0] <= amountInMax, "UniswapV2Router: EXCESSIVE_INPUT_AMOUNT");
         TransferHelper.safeTransferFrom(
             path[0],
-            msg.sender,
+            _msgSender(),
             UniswapV2Library.pairFor(factory, path[0], path[1]),
             amounts[0]
         );
@@ -326,7 +363,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         require(amounts[0] <= amountInMax, "UniswapV2Router: EXCESSIVE_INPUT_AMOUNT");
         TransferHelper.safeTransferFrom(
             path[0],
-            msg.sender,
+            _msgSender(),
             UniswapV2Library.pairFor(factory, path[0], path[1]),
             amounts[0]
         );
@@ -347,7 +384,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         require(amounts[amounts.length - 1] >= amountOutMin, "UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT");
         TransferHelper.safeTransferFrom(
             path[0],
-            msg.sender,
+            _msgSender(),
             UniswapV2Library.pairFor(factory, path[0], path[1]),
             amounts[0]
         );
@@ -369,7 +406,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         assert(IWETH(WETH).transfer(UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]));
         _swap(amounts, path, to);
         // refund dust eth, if any
-        if (msg.value > amounts[0]) TransferHelper.safeTransferETH(msg.sender, msg.value - amounts[0]);
+        if (msg.value > amounts[0]) TransferHelper.safeTransferETH(_msgSender(), msg.value - amounts[0]);
     }
 
     // **** SWAP (supporting fee-on-transfer tokens) ****
@@ -407,7 +444,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
     ) external virtual override ensure(deadline) {
         TransferHelper.safeTransferFrom(
             path[0],
-            msg.sender,
+            _msgSender(),
             UniswapV2Library.pairFor(factory, path[0], path[1]),
             amountIn
         );
@@ -447,7 +484,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         require(path[path.length - 1] == WETH, "UniswapV2Router: INVALID_PATH");
         TransferHelper.safeTransferFrom(
             path[0],
-            msg.sender,
+            _msgSender(),
             UniswapV2Library.pairFor(factory, path[0], path[1]),
             amountIn
         );

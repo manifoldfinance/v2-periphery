@@ -1,8 +1,10 @@
-pragma solidity =0.6.6;
+/// SPDX-License-Identifier: GPL-3.0-or-later
+pragma solidity =0.6.12;
 
-import '../libraries/UniswapV2LiquidityMathLibrary.sol';
+import "../libraries/UniswapV2LiquidityMathLibrary.sol";
 
-contract ExampleComputeLiquidityValue {
+/// @title Test ComputeLiquidityValuee
+contract ComputeLiquidityValue {
     using SafeMath for uint256;
 
     address public immutable factory;

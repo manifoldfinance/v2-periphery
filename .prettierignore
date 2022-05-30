@@ -1,0 +1,17 @@
+types/
+type-doc*
+artifacts/
+cache/
+*.html
+*.min.js
+*.css
+*.scss
+tests/
+!src/*
+test_config/
+tests_config/
+test/
+__snapshots__
+coverage/
+tests/format/**/*.sol
+buildV1/**/*.json
