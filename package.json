@@ -41,10 +41,12 @@
     "@types/mocha": "^9.1.1",
     "@types/node": "^16",
     "dotenv": "^16.0.0",
-    "ethers": "^5.6.4",
+    "ethers": "^5.6.5",
     "hardhat": "^2.9.3",
+    "hardhat-typechain": "^0.3.5",
     "prettier": "^2.6.2",
     "prettier-plugin-solidity": "^1.0.0-beta.19",
+    "ts-generator": "^0.1.1",
     "ts-node": "^10.7.0",
     "tslib": "^2.4.0",
     "typechain": "^8.0.0",
@@ -62,7 +64,8 @@
     "postcompile": "yarn copy-v1-artifacts",
     "pretest": "yarn compile",
     "test": "mocha",
-    "prepublishOnly": "yarn test"
+    "prepublishOnly": "yarn test",
+    "forge-typechain": "npx typechain --discriminate-types --target ethers-v5 \"out/**/*.json\""
   },
   "license": "GPL-3.0-or-later"
 }
