@@ -28,7 +28,3 @@ jobs:
       - name: Compile
         id: compile
         run: forge build --sizes
-
-      - name: Run Gas Snapshot
-        id: gas
-        run: forge snapshot --allow-failure
