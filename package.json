@@ -1,6 +1,6 @@
 {
   "name": "sushiswap-v1-periphery",
-  "version": "1.2.0-RC.0",
+  "version": "1.1.0",
   "description": "Peripheral smart contracts for interacting with Sushiswap V1",
   "repository": {
     "type": "git",
@@ -15,7 +15,8 @@
     "/artifacts/contracts/**/*.json",
     "!artifacts/contracts/**/*.dbg.json",
     "!artifacts/contracts/test/**/*",
-    "!artifacts/contracts/base/**/*"
+    "!artifacts/contracts/base/**/*",
+    "types/**/*"
   ],
   "sideEffects": false,
   "main": "./dist/index.cjs",
@@ -41,8 +42,8 @@
     "@types/mocha": "^9.1.1",
     "@types/node": "^16",
     "dotenv": "^16.0.0",
-    "ethers": "^5.6.5",
-    "hardhat": "^2.9.3",
+    "ethers": "5.6.5",
+    "hardhat": "2.9.3",
     "hardhat-typechain": "^0.3.5",
     "prettier": "^2.6.2",
     "prettier-plugin-solidity": "^1.0.0-beta.19",
@@ -54,9 +55,9 @@
     "typescript": "4.6.3"
   },
   "scripts": {
-    "build": "npx hardhat compile",
-    "lint": "yarn prettier ./test/*.ts --check",
-    "lint:fix": "yarn prettier ./test/*.ts --write",
+    "build": "hardhat compile",
+    "lint": "prettier ./test/*.ts --check",
+    "lint:fix": "prettier ./test/*.ts --write",
     "clean": "rimraf ./build/",
     "copy-v1-artifacts": "ncp ./buildV1 ./build",
     "precompile": "yarn clean",
@@ -64,7 +65,6 @@
     "postcompile": "yarn copy-v1-artifacts",
     "pretest": "yarn compile",
     "test": "mocha",
-    "prepublishOnly": "yarn test",
     "forge-typechain": "npx typechain --discriminate-types --target ethers-v5 \"out/**/*.json\""
   },
   "license": "GPL-3.0-or-later"
